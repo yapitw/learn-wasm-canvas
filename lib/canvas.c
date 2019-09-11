@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #include <emscripten.h>
 #include <stdint.h>
 // Number of circles
-#define NUM_CIRCLES 20
+#define NUM_CIRCLES 500
+#define GRAVITY 1
 
 // Circle Struct
 
@@ -25,8 +27,6 @@ struct CircleAnimationData
   int16_t r;  // circle radius
   int16_t xv; // x - axis velocity
   int16_t yv; // y - axis velocity
-  int16_t xd; // x - axis direction (1 = forward)
-  int16_t yd; // y - axis direction (1 = forward)
 };
 
 // Circles variable
@@ -50,17 +50,15 @@ int main()
   {
     // Radius
     int radius = getRand(50);
-    int x = getRand(1000) + radius;
-    int y = getRand(1000) + radius;
+    int x = getRand(500) + radius + 1000 - 250;
+    int y = getRand(500) + radius + 100;
 
     // Fill animation data struct - i
     animationData[i].x = x;
     animationData[i].y = y;
     animationData[i].r = radius;
-    animationData[i].xv = getRand(10);
-    animationData[i].yv = getRand(10);
-    animationData[i].xd = 1;
-    animationData[i].yd = 1;
+    animationData[i].xv = getRand(20) - 10;
+    animationData[i].yv = getRand(20) - 10;
 
     // Fill circle struct - i
     circles[i].x = x;
@@ -85,40 +83,18 @@ struct Circle *getCircles(int canvasWidth, int canvasHeight)
   for (int i = 0; i < NUM_CIRCLES; i++)
   {
 
-    // Collision RIGHT - set x direction backwards 0
-    if ((animationData[i].x + animationData[i].r) >= canvasWidth)
-      animationData[i].xd = 0;
+    animationData[i].yv += GRAVITY;
+    // Collision Horizontal
+    if ((animationData[i].x + animationData[i].r) >= canvasWidth || (animationData[i].x - animationData[i].r) <= 0)
+      animationData[i].xv = round(animationData[i].xv * -0.95);
 
-    // Collision LEFT - set x direction forwards 1
-    if ((animationData[i].x - animationData[i].r) <= 0)
-      animationData[i].xd = 1;
+    // Collision Vertical
+    if ((animationData[i].y + animationData[i].r) >= canvasHeight || (animationData[i].y - animationData[i].r) <= 0)
+      animationData[i].yv = round(animationData[i].yv * -0.95);
 
-    // Collision BOTTOM - set y direction backwards 0
-    if ((animationData[i].y + animationData[i].r) >= canvasHeight)
-      animationData[i].yd = 0;
-
-    // Collision TOP - set y direction forwards 1
-    if ((animationData[i].y - animationData[i].r) <= 0)
-      animationData[i].yd = 1;
-
-    // Move circle in specified direction
-    if (animationData[i].xd == 1)
-    {
-      animationData[i].x += animationData[i].xv;
-    }
-    else
-    {
-      animationData[i].x -= animationData[i].xv;
-    }
-
-    if (animationData[i].yd == 1)
-    {
-      animationData[i].y += animationData[i].yv;
-    }
-    else
-    {
-      animationData[i].y -= animationData[i].yv;
-    }
+    // Move circle
+    animationData[i].x += animationData[i].xv;
+    animationData[i].y += animationData[i].yv;
 
     // Update matching circle
     circles[i].x = animationData[i].x;

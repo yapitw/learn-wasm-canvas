@@ -1220,11 +1220,11 @@ function updateGlobalBufferAndViews(buf) {
 
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 5392,
+    STACK_BASE = 15872,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 5248272,
-    DYNAMIC_BASE = 5248272,
-    DYNAMICTOP_PTR = 5360;
+    STACK_MAX = 5258752,
+    DYNAMIC_BASE = 5258752,
+    DYNAMICTOP_PTR = 15840;
 
 assert(STACK_BASE % 16 === 0, 'stack must start aligned');
 assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
@@ -1757,7 +1757,7 @@ function _emscripten_asm_const_iii(code, a0, a1) {
 
 
 
-// STATICTOP = STATIC_BASE + 4368;
+// STATICTOP = STATIC_BASE + 14848;
 /* global initializers */ /*__ATINIT__.push();*/
 
 
@@ -1768,7 +1768,7 @@ function _emscripten_asm_const_iii(code, a0, a1) {
 
 
 /* no memory initializer */
-var tempDoublePtr = 5376
+var tempDoublePtr = 15856
 assert(tempDoublePtr % 8 == 0);
 
 function copyTempFloat(ptr) { // functions, because inlining this code increases code size too much
@@ -1994,6 +1994,9 @@ function copyTempDouble(ptr) {
     }
 
   
+   
+
+  
   function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.set(HEAPU8.subarray(src, src+num), dest);
     }
@@ -2055,7 +2058,7 @@ function intArrayToString(array) {
 }
 
 
-// ASM_LIBRARY EXTERN PRIMITIVES: Int8Array,Int32Array
+// ASM_LIBRARY EXTERN PRIMITIVES: Math_floor,Math_ceil,Int8Array,Int32Array
 
 function nullFunc_ii(x) { abortFnPtrError(x, 'ii'); }
 function nullFunc_iidiiii(x) { abortFnPtrError(x, 'iidiiii'); }
@@ -2123,6 +2126,12 @@ var _getCircles = Module["_getCircles"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return Module["asm"]["_getCircles"].apply(null, arguments)
+};
+
+var _llvm_round_f64 = Module["_llvm_round_f64"] = function() {
+  assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+  assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+  return Module["asm"]["_llvm_round_f64"].apply(null, arguments)
 };
 
 var _main = Module["_main"] = function() {
